@@ -8,46 +8,35 @@ import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 
+import ba.sum.fpmoz.wineshop.Interface.ItemClickListener;
 import ba.sum.fpmoz.wineshop.R;
-import ba.sum.fpmoz.wineshop.model.Wine;
 
-public class WineViewHolder extends RecyclerView.ViewHolder {
-    View mView;
+public class WineViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
-    ImageView imageImg;
-    TextView titleTxt;
-    TextView opisTxt;
-    TextView cijenaInt;
+    public TextView naziv, opis, cijena;
+    public ImageView slika;
+
+    private ItemClickListener itemClickListener;
 
     public WineViewHolder(@NonNull View itemView) {
         super(itemView);
-        this.mView = itemView;
-        this.imageImg = itemView.findViewById(R.id.wine_image);
-        this.titleTxt = itemView.findViewById(R.id.wine_title);
-        this.opisTxt = itemView.findViewById(R.id.wine_opis);
-        this.cijenaInt = itemView.findViewById(R.id.wine_cijena);
 
-        this.mView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                clickListener.onItemClick(v, getAdapterPosition());
-            }
-        });
-    }
-    public ClickListener clickListener;
+        naziv=(TextView)itemView.findViewById(R.id.wine_title);
+        cijena=(TextView)itemView.findViewById(R.id.wine_cijena);
+        opis=(TextView)itemView.findViewById(R.id.wine_opis);
+        slika=(ImageView)itemView.findViewById(R.id.wine_image);
 
-    public void setOnClickListener (ClickListener clickListener) {
-        this.clickListener = clickListener;
-    }
-    public interface ClickListener {
-        public void onItemClick(View v, int position);
-    }
-    public void setMovie (Wine wine) {
-        this.titleTxt.setText(wine.naziv);
-        this.opisTxt.setText(wine.opis);
-        this.cijenaInt.setText(wine.cijena);
-        Picasso.get().load(wine.slika).into(this.imageImg);
-    }
+        itemView.setOnClickListener(this);
 
 
+    }
+
+    public void setItemClickListener(ItemClickListener itemClickListener) {
+        this.itemClickListener = itemClickListener;
+    }
+
+    @Override
+    public void onClick(View v) {
+        itemClickListener.onClick(v, getAdapterPosition(), false);
+    }
 }

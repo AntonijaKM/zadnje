@@ -1,5 +1,6 @@
 package ba.sum.fpmoz.wineshop;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
@@ -7,79 +8,70 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
+import ba.sum.fpmoz.wineshop.model.Korisnik;
 
 public class RegistracijaAktivnost extends AppCompatActivity {
 
-    EditText email_txt;
-    EditText lozinka_txt;
-    Button registracija_btn;
-    Button login_btn;
-
-    FirebaseAuth auth;
+    TextView email_txt, lozinka_txt;
+    TextView registracija_btn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_registracija_aktivnost);
 
-        auth = FirebaseAuth.getInstance();
+        email_txt = (TextView) findViewById(R.id.email_txt);
+        lozinka_txt = (TextView) findViewById(R.id.lozinka_txt);
+        registracija_btn = (Button)findViewById(R.id.registracija_btn);
 
-        if (auth.getCurrentUser() !=null) {
-            Intent i = new Intent(RegistracijaAktivnost.this, GlavnaAktivnost.class);
-            startActivity(i);
-            finish();
-        }
-        this.email_txt = findViewById(R.id.email_txt);
-        this.lozinka_txt = findViewById(R.id.lozinka_txt);
-        this.registracija_btn = findViewById(R.id.registracija_btn);
-        this.login_btn = findViewById(R.id.login_btn);
+        final FirebaseDatabase database=FirebaseDatabase.getInstance();
+        final DatabaseReference table_korisnik = database.getReference("korisnik");
 
-        this.login_btn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String email = email_txt.getText().toString();
-                String lozinka = lozinka_txt.getText().toString();
-
-                if(email.equals("") || lozinka.equals("")){
-                    Toast.makeText(getApplicationContext(), "Molimo unesite podatke za prijavu.",Toast.LENGTH_LONG).show();
-                    }else {
-                    auth.signInWithEmailAndPassword(email,lozinka).addOnCompleteListener(RegistracijaAktivnost.this, new OnCompleteListener<AuthResult>() {
-                        @Override
-                        public void onComplete(@NonNull Task<AuthResult> task) {
-                            if (task.isSuccessful()) {
-                                Toast.makeText(getApplicationContext(), "Uspješna prijava!",Toast.LENGTH_LONG).show();
-                                Intent i = new Intent(RegistracijaAktivnost.this, GlavnaAktivnost.class);
-                                startActivity(i);
-                            } else {
-                                Toast.makeText(getApplicationContext(), "Neuspješna prijava!",Toast.LENGTH_LONG).show();
-
-                            }
-                        }
-                    });
-                }
-            }
-        });
         registracija_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String email = email_txt.getText().toString();
-                String lozinka = lozinka_txt.getText().toString();
+                final ProgressDialog mDialog = new ProgressDialog(RegistracijaAktivnost.this);
+                mDialog.setMessage("Pričekajte molim");
+                mDialog.show();
 
-                auth.createUserWithEmailAndPassword(email, lozinka)
-                        .addOnCompleteListener(RegistracijaAktivnost.this, new OnCompleteListener<AuthResult>() {
-                            @Override
-                            public void onComplete(@NonNull Task<AuthResult> task) {
-                                Toast.makeText(getApplicationContext(), "Uspješno ste registrirani.", Toast.LENGTH_LONG).show();
+                table_korisnik.addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        if (dataSnapshot.child(email_txt.getText().toString()).exists())
+                        {
+                            mDialog.dismiss();
+                            Toast.makeText(RegistracijaAktivnost.this, "Email već postoji!", Toast.LENGTH_SHORT).show();
+                        }
+                        else {
+                            mDialog.dismiss();
+                            Korisnik korisnik = new Korisnik(email_txt.getText().toString(),lozinka_txt.getText().toString());
+                            table_korisnik.child(email_txt.getText().toString()).setValue(korisnik);
+                            Toast.makeText(RegistracijaAktivnost.this, "Registracija uspješna", Toast.LENGTH_SHORT).show();
+                            finish();
+                        }
+                    }
 
-                            }
-                        });
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                    }
+                });
             }
         });
+
     }
 }
+

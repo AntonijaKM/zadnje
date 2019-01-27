@@ -8,25 +8,25 @@
     tools:context=".PrijavaAktivnost">
 
 
-    <TextView
+    <EditText
         android:id="@+id/email_txt"
-        android:hint="Vaš Email"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="kika3001@gmail.com"
-        android:inputType="textEmailAddress"
-        />
+        android:ems="10"
+        android:hint="Unesite email"
+        android:inputType="textEmailAddress" />
 
-    <TextView
+    <EditText
         android:id="@+id/lozinka_txt"
-        android:hint="Vaša lozinka"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="12345" />
+        android:ems="10"
+        android:hint="Unesite lozinku"
+        android:inputType="textPassword" />
 
     <Button
         android:id="@+id/login_btn"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Button" />
+        android:text="Prijavite se" />
 </LinearLayout>
